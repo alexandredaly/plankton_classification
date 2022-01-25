@@ -11,6 +11,7 @@ from torch.optim import lr_scheduler
 import torchvision.models                                      
 import torchvision.transforms as transforms
 from data.plankton_dataset import planktondataset
+import utils
 # Local modules
 import preprocess_functions
 
@@ -137,12 +138,6 @@ def train(model, loader, f_loss, optimizer, device):
         print(loss.item())
         
 
-
-#An example of calling train to learn over 10 epochs of the training set
-for i in range(10):
-    print("epoch{}".format(i))
-    train(model, train_dataloader, f_loss, optimizer, device)
-
 def test(model, loader, f_loss, device):
     """
     Test a model by iterating over the loader
@@ -197,13 +192,27 @@ def test(model, loader, f_loss, device):
         return tot_loss/N, correct/N
 
 
-for t in range(10):
+#An example of calling train to learn over 10 epochs of the training set
+# 1- create the directory "./logs" if it does not exist
+top_logdir = "./logs"
+if not os.path.exists(top_logdir):
+    os.mkdir(top_logdir)
+# Where to store the logs
+logdir = utils.generate_unique_logpath(top_logdir, "resnet18")
+print("Logging to {}".format(logdir))
+if not os.path.exists(logdir):
+    os.mkdir(logdir)
+
+# Define the callback object
+model_checkpoint = utils.ModelCheckpoint(logdir + "/best_model.pt", model)
+
+for t in range(3):
     print("Epoch {}".format(t))
     train(model, train_dataloader, f_loss, optimizer, device)
 
     val_loss, val_acc = test(model, valid_dataloader, f_loss, device)
     print(" Validation : Loss : {:.4f}, Acc : {:.4f}".format(val_loss, val_acc))
-
+    model_checkpoint.update(val_loss)
 
 # Disable grad
 # with torch.no_grad():
