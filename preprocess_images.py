@@ -6,6 +6,7 @@ import tqdm
 import pprint
 # Local modules
 import preprocess_functions
+import utils
 
 # The datasets is already downloaded on the cluster
 dataset_dir = "train_try/"

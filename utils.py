@@ -118,3 +118,13 @@ def test(model, loader, f_loss, device):
             predicted_targets = outputs.argmax(dim=1)
             correct += (predicted_targets == targets).sum().item()
         return tot_loss/N, correct/N
+
+
+def get_weights(dataset):
+    classes_counts = {}
+    for element, target in dataset:
+        classe = int(target)
+        classes_counts[classe] = classes_counts.get(classe, 0) + 1
+    nb_tot_items = dataset.__len__()
+    weights = [classes_counts[i]/nb_tot_items for i in range(len(classes_counts.keys()))]
+    return weights
