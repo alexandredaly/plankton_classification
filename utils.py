@@ -24,3 +24,12 @@ class ModelCheckpoint:
             torch.save(self.model.state_dict(), self.filepath)
             #torch.save(self.model, self.filepath)
             self.min_loss = loss
+
+def get_weights(dataset):
+    classes_counts = {}
+    for element, target in dataset:
+        classe = int(target)
+        classes_counts[classe] = classes_counts.get(classe, 0) + 1
+    nb_tot_items = dataset.__len__()
+    weights = [classes_counts[i]/nb_tot_items for i in range(len(classes_counts.keys()))]
+    return weights

@@ -36,6 +36,11 @@ train_dataset, valid_dataset = preprocess_functions.make_trainval_dataset(
     image_transform_params=image_transform_params,
     transform=image_transform)
 
+weights_train = utils.get_weights(train_dataset)
+weights_valid = utils.get_weights(valid_dataset)
+weights = []
+for w_t, w_v in zip(weights_train, weights_valid):
+    weights.append((1-valid_ratio)*w_t + valid_ratio*w_v)
 
 # Dataloader
 num_threads = 4   # Loading the dataset is using 4 CPU threads
@@ -85,7 +90,8 @@ model.fc = torch.nn.Linear(512, 86)
 model = model.to(device)
 
 #Instanciate the loss
-f_loss = torch.nn.CrossEntropyLoss()
+#1 f_loss = torch.nn.CrossEntropyLoss()
+f_loss = torch.nn.CrossEntropyLoss(weight=torch.FloatTensor(weights))
 
 #Instanciate optimizer
 #optimizer = torch.optim.Adam(model.parameters())
