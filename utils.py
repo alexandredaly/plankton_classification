@@ -128,5 +128,9 @@ def get_weights(dataset_dir):
         classe = int(class_path[:3])
         classes_counts[classe] = len(os.listdir(os.path.join(dataset_dir, class_path)))
     nb_tot_items = sum(classes_counts.values())
-    weights = [classes_counts[i]/nb_tot_items for i in range(len(classes_counts.keys()))]
-    return weights
+    ls_weights = [1/classes_counts[i] for i in range(len(classes_counts.keys()))]
+    sum_weights = sum(ls_weights)
+    norm_weights = []
+    for weight in ls_weights:
+        norm_weights.append(weight/sum_weights)
+    return norm_weights
