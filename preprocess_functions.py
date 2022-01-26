@@ -1,7 +1,8 @@
 import os
 import torch
+import torchvision.datasets
 import torchvision.transforms as transforms
-from data.plankton_dataset import planktondataset
+from data.plankton_dataset import planktondataset, plankton_test_dataset
 
 def check_key(d, key, valid_values):
     if not key in d:
@@ -74,4 +75,16 @@ def make_trainval_dataset(dataset_dir: str,
     dataset_train, dataset_val = torch.utils.data.dataset.random_split(dataset_train_and_valid, [nb_train, nb_valid])
 
     return dataset_train, dataset_val
+
+
+def make_test_dataset(dataset_dir: str,
+                          image_transform_params: dict,
+                          transform: object):
+
+    image_transform  = make_image_transform(image_transform_params, transform)
+
+    dataset_test = plankton_test_dataset(root=dataset_dir,
+                                transforms = image_transform)
+
+    return dataset_test
 
