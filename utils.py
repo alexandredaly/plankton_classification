@@ -1,5 +1,6 @@
 import os
 import torch
+from tqdm import tqdm
 
 def generate_unique_logpath(logdir, raw_run_name):
     i = 0
@@ -120,11 +121,12 @@ def test(model, loader, f_loss, device):
         return tot_loss/N, correct/N
 
 
-def get_weights(dataset):
+def get_weights(dataset_dir):
     classes_counts = {}
-    for element, target in dataset:
-        classe = int(target)
-        classes_counts[classe] = classes_counts.get(classe, 0) + 1
-    nb_tot_items = dataset.__len__()
+    list_class_path = os.listdir(dataset_dir)
+    for class_path in tqdm(list_class_path):
+        classe = int(class_path[:3])
+        classes_counts[classe] = len(os.listdir(os.path.join(dataset_dir, class_path)))
+    nb_tot_items = sum(classes_counts.values())
     weights = [classes_counts[i]/nb_tot_items for i in range(len(classes_counts.keys()))]
     return weights

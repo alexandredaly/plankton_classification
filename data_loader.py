@@ -37,7 +37,6 @@ if __name__ == '__main__':
         image_transform_params=image_transform_params,
         transform=image_transform)
 
-
     # Dataloader
     num_threads = 4  # Loading the dataset is using 4 CPU threads
     batch_size  = 256  # Using minibatches of 512 samples
@@ -86,8 +85,14 @@ if __name__ == '__main__':
     model = model.to(device)
 
     #Instanciate the loss
-    f_loss = torch.nn.CrossEntropyLoss()
+    #1 f_loss = torch.nn.CrossEntropyLoss()
 
+    weights = utils.get_weights(dataset_dir)
+    weights = torch.FloatTensor(weights)
+    weights = weights.to(device)
+
+    f_loss = torch.nn.CrossEntropyLoss(weight=weights)
+    
     #Instanciate optimizer
     #optimizer = torch.optim.Adam(model.parameters())
 
