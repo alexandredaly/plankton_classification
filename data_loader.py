@@ -70,9 +70,20 @@ if __name__ == '__main__':
             y = self.classifier(x)
             return y
 
-    # model = LinearNet(1*224*224, 86)
+    #1 model = LinearNet(1*224*224, 86)
+
+    #2 model = torchvision.models.resnet18(pretrained=True)
+    # for param in model.parameters():
+    #     param.requires_grad = False
+
+    # # Parameters of newly constructed modules have requires_grad=True by default
+    # #We aadapt our model too 1-channel images by chaanging the input
+    # model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+    # # Here's the classifying head of our model that we are going to train
+    # model.fc = torch.nn.Linear(512, 86)
 
     model = torchvision.models.resnet18(pretrained=True)
+    model = nn.Sequential(*list(model.children())[:-2])
     for param in model.parameters():
         param.requires_grad = False
 
@@ -80,7 +91,7 @@ if __name__ == '__main__':
     #We aadapt our model too 1-channel images by chaanging the input
     model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
     # Here's the classifying head of our model that we are going to train
-    model.fc = torch.nn.Linear(512, 86)
+    model.fc = nn.Sequential(nn.Linear(512*7*7, 86))
 
     model = model.to(device)
 
