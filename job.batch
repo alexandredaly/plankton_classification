@@ -1,0 +1,11 @@
+#!/bin/bash 
+
+#SBATCH --job-name=256_pinder_resnet50
+#SBATCH --nodes=1
+#SBATCH --partition=gpu_prod_long
+#SBATCH --exclude=sh[00,10-16]
+#SBATCH --time=12:00:00
+#SBATCH --output=logslurms/slurm-%j.out
+#SBATCH --error=logslurms/slurm-%j.err
+
+python3 data_loader.py
