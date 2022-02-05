@@ -1,6 +1,7 @@
 import os
 import torch
 from tqdm import tqdm
+from sklearn.metrics import f1_score
 
 def generate_unique_logpath(logdir, raw_run_name):
     i = 0
@@ -91,6 +92,8 @@ def test(model, loader, f_loss, device):
         model.eval()
         N = 0
         tot_loss, correct = 0.0, 0.0
+        y_true=[]
+        y_pred=[]
         for i, (inputs, targets) in tqdm(enumerate(loader)):
 
             # We got a minibatch from the loader within inputs and targets
@@ -110,15 +113,22 @@ def test(model, loader, f_loss, device):
             # We accumulate the loss considering
             # The multipliation by inputs.shape[0] is due to the fact
             # that our loss criterion is averaging over its samples
+            #tot_loss += inputs.shape[0] * f_loss(outputs, targets).item()
             tot_loss += inputs.shape[0] * f_loss(outputs, targets).item()
-
             # For the accuracy, we compute the labels for each input image
             # Be carefull, the model is outputing scores and not the probabilities
             # But given the softmax is not altering the rank of its input scores
             # we can compute the label by argmaxing directly the scores
             predicted_targets = outputs.argmax(dim=1)
             correct += (predicted_targets == targets).sum().item()
-        return tot_loss/N, correct/N
+
+            # Calculate macro f1 score 
+            y_true += [int(target) for target in targets]
+            y_pred += [int(pred) for pred in predicted_targets]
+        
+        macro_f1_score = f1_score(y_true=y_true, y_pred=y_pred, average='macro')
+
+        return tot_loss/N, correct/N, macro_f1_score
 
 
 def get_weights(dataset_dir):
