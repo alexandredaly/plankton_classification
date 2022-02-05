@@ -141,7 +141,7 @@ if __name__ == '__main__':
 
         val_loss, val_acc, macro_f1 = utils.test(model, valid_dataloader, f_loss, device)
         print(" Validation : Loss : {:.4f}, Acc : {:.4f}, macro_f1 : {:.4F}".format(val_loss, val_acc, macro_f1))
-        model_checkpoint.update(val_loss)
+        model_checkpoint.update_on_score(macro_f1)
 
     # Disable grad
     # with torch.no_grad():

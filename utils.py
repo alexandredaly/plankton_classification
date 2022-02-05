@@ -17,15 +17,23 @@ class ModelCheckpoint:
 
     def __init__(self, filepath, model):
         self.min_loss = None
+        self.max_score = None
         self.filepath = filepath
         self.model = model
 
-    def update(self, loss):
+    def update_on_loss(self, loss):
         if (self.min_loss is None) or (loss < self.min_loss):
             print("Saving a better model")
             torch.save(self.model.state_dict(), self.filepath)
             #torch.save(self.model, self.filepath)
             self.min_loss = loss
+
+    def update_on_score(self, score):
+        if (self.score is None) or (score > self.max_score):
+            print("Saving a better model")
+            torch.save(self.model.state_dict(), self.filepath)
+            #torch.save(self.model, self.filepath)
+            self.mmax_score = score
 
 
 # Train model
