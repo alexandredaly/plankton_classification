@@ -56,7 +56,9 @@ def make_image_transform(image_transform_params: dict,
             image_transform = preprocess_image
     else:
         image_transform = transform
-
+    
+    #image_transform = transforms.Compose([image_transform, transforms.RandomRotation(180, fill=255)])
+    
     return image_transform
 
 
