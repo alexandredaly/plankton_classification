@@ -36,15 +36,17 @@ if __name__ == '__main__':
     dataset_dir=dataset_dir,
     image_transform_params=image_transform_params,
     transform=image_transform)
-
+    print(train_dataset.__len__())
     # Dataloader
     num_threads = 4 # Loading the dataset is using 4 CPU threads
     batch_size = 128 # Using minibatches of 512 samples
 
     #Sampler
-    #weights = utils.get_weights(dataset_dir)
-    #weights = torch.FloatTensor(weights)
-    #sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, 100000)
+    # weights = utils.get_weights(dataset_dir)
+    # weights_sampler = utils.get_weights_sampler(train_dataset, weights)
+    # print(len(weights_sampler))
+    # weights_sampler = torch.FloatTensor(weights_sampler)
+    # sampler = torch.utils.data.sampler.WeightedRandomSampler(weights_sampler, len(weights_sampler))
 
     train_dataloader = torch.utils.data.DataLoader(dataset=train_dataset,
     batch_size=batch_size,
@@ -79,7 +81,7 @@ if __name__ == '__main__':
 
     #1 model = LinearNet(1*224*224, 86)
 
-    model = torchvision.models.resnet18(pretrained=True)
+    model = torchvision.models.resnet50(pretrained=True)
     # for param in model.parameters():
     # param.requires_grad = False
 
@@ -87,7 +89,7 @@ if __name__ == '__main__':
     #We aadapt our model too 1-channel images by chaanging the input
     model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
     # Here's the classifying head of our model that we are going to train
-    model.fc = torch.nn.Linear(512, 86)
+    model.fc = torch.nn.Linear(2048, 86)
 
     # model = torchvision.models.resnet18(pretrained=True)
     # model = nn.Sequential(*list(model.children())[:-2])
@@ -103,13 +105,13 @@ if __name__ == '__main__':
     model = model.to(device)
 
     #Instanciate the loss
-    #f_loss = torch.nn.CrossEntropyLoss()
+    f_loss = torch.nn.CrossEntropyLoss()
 
-    weights = utils.get_weights(dataset_dir)
-    weights = torch.FloatTensor(weights)
-    weights = weights.to(device)
+    # weights = utils.get_weights(dataset_dir)
+    # weights = torch.FloatTensor(weights)
+    # weights = weights.to(device)
 
-    f_loss = torch.nn.CrossEntropyLoss(weight=weights)
+    # f_loss = torch.nn.CrossEntropyLoss(weight=weights)
     #Instanciate optimizer
     #optimizer = torch.optim.Adam(model.parameters())
 
@@ -127,7 +129,7 @@ if __name__ == '__main__':
     if not os.path.exists(top_logdir):
         os.mkdir(top_logdir)
     # Where to store the logs
-    logdir = utils.generate_unique_logpath(top_logdir, "resnet18_finetuning_weightedloss_batch128_Adam")
+    logdir = utils.generate_unique_logpath(top_logdir, "resnet50_finetuning_nonweightedloss_batch128_Adam")
     print("Logging to {}".format(logdir))
     if not os.path.exists(logdir):
         os.mkdir(logdir)

@@ -6,16 +6,16 @@ import pandas as pd
 import preprocess_functions
 from tqdm import tqdm
 
-model_path = "logs/resnet18_3/best_model.pt"
-model = torchvision.models.resnet18(pretrained=True)
-for param in model.parameters():
-    param.requires_grad = False
+model_path = "logs/resnet50_finetuning_nonweightedloss_batch128_Adam_2/best_model.pt"
+model = torchvision.models.resnet50(pretrained=True)
+# for param in model.parameters():
+#     param.requires_grad = False
 
 # Parameters of newly constructed modules have requires_grad=True by default
 #We aadapt our model too 1-channel images by chaanging the input
 model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
 # Here's the classifying head of our model that we are going to train
-model.fc = torch.nn.Linear(512, 86)
+model.fc = torch.nn.Linear(2048, 86)
 
 device = torch.device('cuda')
 model = model.to(device)
@@ -38,7 +38,7 @@ test_dataset = preprocess_functions.make_test_dataset(dataset_dir="../../Dataset
                                                     image_transform_params=image_transform_params,
                                                     transform=image_transform)
 
-batch_size = 256
+batch_size = 128
 test_dataloader = torch.utils.data.DataLoader(dataset=test_dataset,
                                         batch_size=batch_size,
                                         shuffle=False,                # <-- this reshuffles the data at every epoch
@@ -60,4 +60,4 @@ with torch.no_grad():
         else:
             df_new = pd.DataFrame(data = {'imgname' : list(names_images), 'label' : outputs.numpy()})
             df = pd.concat([df, df_new])
-    df.to_csv('predictions.csv', index=False)
+    df.to_csv('predictions_final.csv', index=False)
