@@ -38,7 +38,7 @@ class ModelCheckpoint:
 
 # Train model
 
-def train(model, loader, f_loss, optimizer, device):
+def train_epoch(model, loader, f_loss, optimizer, device):
     """
     Train a model for one epoch, iterating over the loader
     using the f_loss to compute the loss and the optimizer
@@ -76,7 +76,7 @@ def train(model, loader, f_loss, optimizer, device):
         print(loss.item())
         
 
-def test(model, loader, f_loss, device):
+def test_epoch(model, loader, f_loss, device):
     """
     Test a model by iterating over the loader
 
@@ -159,6 +159,28 @@ def get_weights_sampler(dataset, weights):
     for i in tqdm(range(dataset.__len__())):
         sampler_weights.append(weights[dataset.__getitem__(i)[1]])
     return sampler_weights
+
+
+def get_loss(name, with_weights = False, dataset_dir=None, device=None):
+    if name == 'crossentropy':
+        if with_weights == False:
+            return torch.nn.CrossEntropyLoss()
+        else:
+            weights = get_weights(dataset_dir)
+            weights = torch.FloatTensor(weights)
+            weights = weights.to(device)
+            return torch.nn.CrossEntropyLoss(weight=weights)
+
+
+def get_optimizer(name, model):
+    if name == 'adam':
+        return torch.optim.Adam(model.parameters())
+    elif name == 'sgd':
+        optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+        # Decay LR by a factor of 0.1 every 10 epochs
+        exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+        return optimizer
+
 
 
 
