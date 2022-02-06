@@ -29,11 +29,11 @@ class ModelCheckpoint:
             self.min_loss = loss
 
     def update_on_score(self, score):
-        if (self.score is None) or (score > self.max_score):
+        if (self.max_score is None) or (score > self.max_score):
             print("Saving a better model")
             torch.save(self.model.state_dict(), self.filepath)
             #torch.save(self.model, self.filepath)
-            self.mmax_score = score
+            self.max_score = score
 
 
 # Train model
@@ -152,3 +152,15 @@ def get_weights(dataset_dir):
     for weight in ls_weights:
         norm_weights.append(weight/sum_weights)
     return norm_weights
+
+
+def get_weights_sampler(dataset, weights):
+    sampler_weights = []
+    for i in tqdm(range(dataset.__len__())):
+        sampler_weights.append(weights[dataset.__getitem__(i)[1]])
+    return sampler_weights
+
+
+
+
+
