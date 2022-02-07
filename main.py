@@ -1,25 +1,33 @@
 import sys
 import os
 import yaml
-import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 import torch
 import torchvision.transforms as transforms
 import pandas as pd
+# Local modules
 from data.plankton_dataset import planktondataset
 import utils
-# Local modules
 import preprocess_functions
 import models
 
 
 def main(image_transform, image_transform_params, batch_size, model, optimizer, f_loss, nb_epochs, training_description):
     """
-    Main function to launch
+    Main function to launch.
+    train mode launches train() function --> stores best model at logs/<training_description>/best_model.pt
+    test mode launches test() function --> generates csv prediction file
 
     Args:
-        - params, dict of parameters from params.py
+        image_transform    -- torch.transforms Module
+        image_transform_params    -- dict - Type of preprocessing to apply to images
+        batch_size             -- int
+        model                  -- A torch.nn object
+        optimizer              -- A torch.optim.Optimzer object
+        f_loss                 -- A loss Module
+        nb_epochs              -- int
+        training_description   -- str
     """
 
     try:
@@ -38,22 +46,44 @@ def main(image_transform, image_transform_params, batch_size, model, optimizer, 
 
 
 def train(dataset_dir, image_transform, image_transform_params, batch_size, model, optimizer, f_loss, nb_epochs, training_description):
+    """
+    Train a model for <nb_epochs> epochs, iterating over the loader
+    using the f_loss to compute the loss and the optimizer
+    to update the parameters of the model. At each epoch, if the score improves then the models parameters
+    are saved at "logs/<training_description>/best_model.pt"
+
+    Arguments :
+
+        dataset_dir     -- dataset filepath
+        image_transform    -- torch.transforms Module
+        image_transform_params    -- dict - Type of preprocessing to apply to images
+        batch_size             -- int
+        model                  -- A torch.nn object
+        optimizer              -- A torch.optim.Optimzer object
+        f_loss                 -- A loss Module
+        nb_epochs              -- int
+        training_description   -- str
+
+    Returns :
+    """
     # Load dataset
     train_dataset, valid_dataset = preprocess_functions.make_trainval_dataset(
         dataset_dir=dataset_dir,
         image_transform_params=image_transform_params,
         transform=image_transform)
-    
-    # Dataloader
+
     num_threads = 4  # Loading the dataset is using 4 CPU threads
 
-    # Sampler
+    #####################################
+    # DATA AUGMENTATION
+    ###################
     # weights = utils.get_weights(dataset_dir)
     # weights_sampler = utils.get_weights_sampler(train_dataset, weights)
-    # print(len(weights_sampler))
     # weights_sampler = torch.FloatTensor(weights_sampler)
     # sampler = torch.utils.data.sampler.WeightedRandomSampler(weights_sampler, len(weights_sampler))
+    #####################################
 
+    # Create dataloaders
     train_dataloader = torch.utils.data.DataLoader(dataset=train_dataset,
                                                    batch_size=batch_size,
                                                    shuffle=True,  # <-- this reshuffles the data at every epoch
@@ -87,6 +117,7 @@ def train(dataset_dir, image_transform, image_transform_params, batch_size, mode
     # Define the callback object
     model_checkpoint = utils.ModelCheckpoint(logdir + "/best_model.pt", model)
 
+    # TRain over the givenn number of epochs
     for t in tqdm(range(nb_epochs)):
         print("Epoch {}".format(t))
         utils.train_epoch(model, train_dataloader, f_loss, optimizer, device)
@@ -95,10 +126,25 @@ def train(dataset_dir, image_transform, image_transform_params, batch_size, mode
             model, valid_dataloader, f_loss, device)
         print(" Validation : Loss : {:.4f}, Acc : {:.4f}, macro_f1 : {:.4F}".format(
             val_loss, val_acc, macro_f1))
+        # If macro f1-score improves then we update the saved model
         model_checkpoint.update_on_score(macro_f1)
 
 
 def test(path_to_checkpoint, test_dataset_dir, image_transform_params, image_transform, batch_size, model):
+    """
+    Test model with parameters saved at path_to_checkpoint on test dataset and generate csv prediction file
+
+    Arguments :
+
+        testdataset_dir     -- test dataset filepath (str)
+        image_transform    -- torch.transforms Module
+        image_transform_params    -- dict - Type of preprocessing to apply to images
+        batch_size             -- int
+        model                  -- A torch.nn object
+
+    Returns :
+    """
+    # Make datasets
     test_dataset = preprocess_functions.make_test_dataset(dataset_dir=test_dataset_dir,
                                                           image_transform_params=image_transform_params,
                                                           transform=image_transform)
@@ -117,16 +163,17 @@ def test(path_to_checkpoint, test_dataset_dir, image_transform_params, image_tra
     model.eval()
 
     with torch.no_grad():
+        # Initialize the dataframe of predictions
         df = None
-        for i, (inputs, targets, names_images) in tqdm(enumerate(test_dataloader)):
+        for i, (inputs, names_images) in tqdm(enumerate(test_dataloader)):
             inputs = inputs.to(device)
-            #targets = targets.to(device)
 
             # Compute the forward pass through the network up to the loss
             outputs = model(inputs)
             outputs = outputs.cpu()
             outputs = np.argmax(outputs, axis=1)
 
+            # Complete the dataframe of predictions
             if df is None:
                 df = pd.DataFrame(data={'imgname': list(
                     names_images), 'label': outputs.numpy()})
@@ -134,6 +181,7 @@ def test(path_to_checkpoint, test_dataset_dir, image_transform_params, image_tra
                 df_new = pd.DataFrame(data={'imgname': list(
                     names_images), 'label': outputs.numpy()})
                 df = pd.concat([df, df_new])
+        # Save dataframe of predictions to csv
         df.to_csv('predictions_{}.csv'.format(path_to_checkpoint.split('/')[1]), index=False)
 
 
@@ -141,7 +189,7 @@ if __name__ == '__main__':
     batch_size = 128  # Using minibatches of 128 samples
     nb_epochs = 20 # We train our model over 20 epochs
 
-    # Choose the post-processing of the image
+    # Choose the post-processing of the image - normalization is required for using resnet
     imagenet_preprocessing = transforms.Normalize(mean=[0.5],
                                                   std=[0.5])
     image_transform = transforms.Compose(
@@ -160,6 +208,6 @@ if __name__ == '__main__':
     optimizer = utils.get_optimizer('adam', model)
 
     # Location to save models 
-    training_description = "resnet18_finetuning_nonweightedloss_batch128_Adam"
+    training_description = "resnet50_finetuning_nonweightedloss_batch128_Adam"
 
     main(image_transform, image_transform_params, batch_size, model, optimizer, f_loss, nb_epochs, training_description)

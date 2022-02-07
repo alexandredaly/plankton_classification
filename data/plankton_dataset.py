@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 from PIL import Image
 
 class planktondataset(Dataset):
-    """Store the SAR data into a torch dataset like object. 
+    """Store the plankton data into a torch dataset like object. 
 
     Args:
         Dataset (class): pytorch dataset object 
@@ -17,7 +17,7 @@ class planktondataset(Dataset):
     def __init__(self, root, transforms=None):
         """
         Args:
-            path (str): absolute path of the data files 
+            root (str): absolute path of the data files 
         """
 
         self.root = root
@@ -32,14 +32,11 @@ class planktondataset(Dataset):
             idx (int): idx-th item to retrieve
 
         Returns:
-            image_input, image_target: the low resolution image and the high resolution image
+            image_input, target: transformed/preprocessed image and its target
         """
-        #self.filepaths[idx] is in the form 'train/082_Aglaura/184.jpg'
         image_input = Image.open(self.files_paths[idx])
+        #self.filepaths[idx] is in the form 'train/082_Aglaura/184.jpg'
         target = self.files_paths[idx].split('/')[-2][1:3]
-        #Possible solution to error ?
-        # target = torch.zeros(86)
-        # target[target_idx] = 1
         if self.transforms is None:
             return image_input, int(target)
         return self.transforms(image_input), int(target)
@@ -54,7 +51,7 @@ class planktondataset(Dataset):
 
 
 class plankton_test_dataset(Dataset):
-    """Store the SAR data into a torch dataset like object. 
+    """Store the plankton test data into a torch dataset like object. 
 
     Args:
         Dataset (class): pytorch dataset object 
@@ -63,7 +60,7 @@ class plankton_test_dataset(Dataset):
     def __init__(self, root, transforms=None):
         """
         Args:
-            path (str): absolute path of the data files 
+            root (str): absolute path of the data files 
         """
 
         self.root = root
@@ -78,18 +75,14 @@ class plankton_test_dataset(Dataset):
             idx (int): idx-th item to retrieve
 
         Returns:
-            image_input, image_target: the low resolution image and the high resolution image
+            image_input, name_image: transformed/preprocessed image and its file name
         """
-        #self.filepaths[idx] is in the form 'train/082_Aglaura/184.jpg'
         image_input = Image.open(self.files_paths[idx])
-        target = self.files_paths[idx].split('/')[-2][1:3]
+        # self.filepaths[idx] is in the form 'train/082_Aglaura/184.jpg'
         name_image = self.files_paths[idx].split('/')[-1]
-        #Possible solution to error ?
-        # target = torch.zeros(86)
-        # target[target_idx] = 1
         if self.transforms is None:
-            return image_input, target, name_image
-        return self.transforms(image_input), target, name_image
+            return image_input, name_image
+        return self.transforms(image_input), name_image
 
     def __len__(self):
         """Operator len that returns the size of the dataset 

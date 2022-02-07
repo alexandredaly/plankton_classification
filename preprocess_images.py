@@ -1,12 +1,13 @@
+### This script was used for ploting images and preprocessed images at the begininning of the project
+### in order to get comfortable with the data
+
+
 # External modules
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import numpy as np
-import tqdm
-import pprint
 # Local modules
 import preprocess_functions
-import utils
 
 # The datasets is already downloaded on the cluster
 dataset_dir = "train_try/"
@@ -25,9 +26,6 @@ train_dataset, valid_dataset = preprocess_functions.make_trainval_dataset(
 
 img, target = train_dataset[img_idx]
 print("The image from the dataset is of type {}".format(type(img)))
-
-print("Saving an image as bird.jpeg")
-# img.save('bird.jpeg')
 
 img = np.asarray(img[0])
 print(img.shape)

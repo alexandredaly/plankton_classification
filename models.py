@@ -16,6 +16,7 @@ class LinearNet(nn.Module):
 def resnet18(freeze=False):
     model = torchvision.models.resnet18(pretrained=True)
     if freeze == True:
+        # Freeze the pretrained weights of resnet18
         for param in model.parameters():
             param.requires_grad = False
 
@@ -30,6 +31,7 @@ def resnet18(freeze=False):
 def resnet50(freeze=False):
     model = torchvision.models.resnet50(pretrained=True)
     if freeze == True:
+        # Freeze the pretrained weights of resnet50
         for param in model.parameters():
             param.requires_grad = False
 

@@ -1,6 +1,5 @@
 import os
 import torch
-import torchvision.datasets
 import torchvision.transforms as transforms
 from data.plankton_dataset import planktondataset, plankton_test_dataset
 
@@ -57,6 +56,7 @@ def make_image_transform(image_transform_params: dict,
     else:
         image_transform = transform
     
+    # folllowing line is for data augmentation
     #image_transform = transforms.Compose([image_transform, transforms.RandomRotation(180, fill=255)])
     
     return image_transform
