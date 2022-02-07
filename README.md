@@ -16,7 +16,7 @@ python3 main.py train PATH_TO_TRAINING_SET
 
 All training parameters (image_transform, image_transform_params, batch_size, model, optimizer, f_loss, nb_epochs and training_description) can be defined at the beginning of the " if __name__=="__main__" " in main.py
 
-## Train a model
+## Test a model
 
 The folowing command is loading the model whose checkpoint fullpath is PATH_TO_CHECKPOINT, testing the model on the images provided in PATH_TO_TEST_SET and outputting the label csv file ready for submission
 ```
