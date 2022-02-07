@@ -18,7 +18,7 @@ All training parameters (image_transform, image_transform_params, batch_size, mo
 
 ## Test a model
 
-The folowing command is loading the model whose checkpoint fullpath is PATH_TO_CHECKPOINT, testing the model on the images provided in PATH_TO_TEST_SET and outputting the label csv file ready for submission
+The folowing command is loading the model whose checkpoint fullpath is PATH_TO_CHECKPOINT, testing the model on the images provided in PATH_TO_TEST_SET and outputting the label csv file ready for submission - csv is stored at the root of the project once generated
 ```
 python3 main.py test PATH_TO_CHECKPOINT PATH_TO_TEST_SET
 ```
