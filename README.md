@@ -1,4 +1,4 @@
-# Plankton_classification_teamA001
+# Plankton_classification_teamA001(Les Jongleurs) - Adrien Antonov, Alexandre Daly, Maxence Duplech, Nicolas Petitmangin
 
 ## Requirements
 
