@@ -104,7 +104,7 @@ def train(dataset_dir, image_transform, image_transform_params, batch_size, mode
     model = model.to(device)
 
     # Create the directory "./logs" if it does not exist
-    top_logdir = os.path.join(os.getcwd(), "log/")
+    top_logdir = os.path.join(os.getcwd(), "logs/")
     if not os.path.exists(top_logdir):
         os.mkdir(top_logdir)
     # Where to store the logs
