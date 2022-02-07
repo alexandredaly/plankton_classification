@@ -199,7 +199,7 @@ if __name__ == '__main__':
     image_transform_params = {'image_mode': 'shrink',
                               'output_image_size': {'width': 224, 'height': 224}}
     #Choose model
-    model = models.resnet18()
+    model = models.resnet50()
 
     # Instanciate the loss
     f_loss = utils.get_loss('crossentropy')
